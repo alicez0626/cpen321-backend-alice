@@ -1,0 +1,37 @@
+{
+  "name": "calendar-local",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babel-core": "^6.26.3",
+    "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.4",
+    "express-promise": "^0.4.0",
+    "express-validator": "^5.3.0",
+    "jsonwebtoken": "^8.3.0",
+    "mysql": "^2.16.0",
+    "node-datetime": "^2.1.2",
+    "promise": "^8.0.2",
+    "promise-mysql": "^3.3.1",
+    "sql-injection": "0.0.6",
+    "validator": "^10.8.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.1.6",
+    "@babel/preset-env": "^7.1.6",
+    "jest": "^23.6.0",
+    "node-mocks-http": "^1.7.3",
+    "nodemon": "^1.18.5",
+    "supertest": "^3.3.0"
+  },
+  "jest": {
+    "collectCoverage": true
+  }
+}

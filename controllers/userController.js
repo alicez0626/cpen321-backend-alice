@@ -1,31 +1,27 @@
-var User = require('../models/user.js');
-const {validationResult} = require('express-validator/check');
+const User = require('../models/user.js');
+var {validationResult} = require('express-validator/check');
 
 /* /users */
 async function userInfoGet (req, res) {
-	const errors = validationResult(req);
-	if (!errors.isEmpty()){
-		return res.status(400).json({"error": "Invalid user email."});
-	}
+	// var errors = validationResult(req);
+	// if (!errors.isEmpty()){
+	// 	console.log('isEmpty!!');
+	// 	return res.status(400).json({"error": "Invalid user email."});
+	// }
 
 	var info;
 
 	try{ 
-		let info = await User.get_info(req.param('userEmail'));
+		let info = await User.getInfo(req.param('userEmail'));
 		return res.status(200).json(info);
 	} catch (error) {
-		return res.status(404).json({error});
+		return res.status(400).json({error});
 	}
 };
 
 async function userUpdate (req, res){
-	const errors = validationResult(req);
-	if (!errors.isEmpty()){
-		return res.status(400).json({"error": "Invalid user info."});
-	}
-
 	try {
-		await User.updateUser(req.body);
+		await User.updateUser(req.body.userId, req.body.update.userPwd);
 		return res.status(200).json();
 	} catch (error) {
 		return res.status(400).json({error});
@@ -33,10 +29,10 @@ async function userUpdate (req, res){
 };
 
 async function userCreate (req, res) {
-	const errors = validationResult(req);
-	if (!errors.isEmpty()){ 
-		return res.status(400).json({"error": "Invalid user info."});
-	}
+	// const errors = validationResult(req);
+	// if (!errors.isEmpty()){ 
+	// 	return res.status(400).json({"error": "Invalid user info."});
+	// }
 
 	try{
 		await User.createUser(req.body.user, req.body.profile);
@@ -70,7 +66,7 @@ async function profileGet (req, res) {
 
 async function profileUpdate (req, res) {
 	try {
-		await User.updateProfile(req.body);
+		await User.modifyProfile(req.body.userId, req.body.update);
 		return res.status(200).end();
 	} catch (error) {
 		return res.status(400).json({error});

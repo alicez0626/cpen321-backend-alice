@@ -20,14 +20,14 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">33.33% </span>
+        <span class="strong">32.35% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>12/36</span>
+        <span class='fraction'>11/34</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">16.67% </span>
+        <span class="strong">0% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>1/6</span>
+        <span class='fraction'>0/4</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">33.33% </span>
@@ -35,9 +35,9 @@
         <span class='fraction'>2/6</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">33.33% </span>
+        <span class="strong">32.35% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>12/36</span>
+        <span class='fraction'>11/34</span>
       </div>
     </div>
   </div>
@@ -125,11 +125,7 @@
 80
 81
 82
-83
-84
-85
-86
-87</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+83</td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -137,6 +133,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -150,16 +147,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -215,37 +207,33 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">var User = require('../models/user.js');
-const {validationResult} = require('express-validator/check');
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const User = require('../models/user.js');
+var {validationResult} = require('express-validator/check');
 &nbsp;
 /* /users */
 async function <span class="fstat-no" title="function not covered" >userInfoGet </span>(req, res) {
-	const errors = <span class="cstat-no" title="statement not covered" >validationResult(req);</span>
+	var errors = <span class="cstat-no" title="statement not covered" >validationResult(req);</span>
 <span class="cstat-no" title="statement not covered" >	if (!errors.isEmpty()){</span>
+<span class="cstat-no" title="statement not covered" >		console.log('isEmpty!!');</span>
 <span class="cstat-no" title="statement not covered" >		return res.status(400).json({"error": "Invalid user email."});</span>
 	}
 &nbsp;
 	var info;
 &nbsp;
 <span class="cstat-no" title="statement not covered" >	try{ </span>
-		let info = <span class="cstat-no" title="statement not covered" >await User.get_info(req.param('userEmail'));</span>
+		let info = <span class="cstat-no" title="statement not covered" >await User.getInfo(req.param('userEmail'));</span>
 <span class="cstat-no" title="statement not covered" >		return res.status(200).json(info);</span>
 	} catch (error) {
-<span class="cstat-no" title="statement not covered" >		return res.status(404).json({error});</span>
+<span class="cstat-no" title="statement not covered" >		return res.status(400).json({error});</span>
 	}
 };
 &nbsp;
 async function userUpdate (req, res){
-	const errors = validationResult(req);
-	<span class="missing-if-branch" title="if path not taken" >I</span>if (!errors.isEmpty()){
-<span class="cstat-no" title="statement not covered" >		return res.status(400).json({"error": "Invalid user info."});</span>
-	}
-&nbsp;
 	try {
 		await User.updateUser(req.body);
 		return res.status(200).json();
 	} catch (error) {
-<span class="cstat-no" title="statement not covered" >		return res.status(400).json({error});</span>
+		return res.status(400).json({error});
 	}
 };
 &nbsp;
@@ -307,7 +295,7 @@ module.exports = {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Sun Nov 18 2018 23:55:05 GMT-0800 (Pacific Standard Time)
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Mon Nov 19 2018 23:43:49 GMT-0800 (Pacific Standard Time)
 </div>
 </div>
 <script src="..\..\prettify.js"></script>

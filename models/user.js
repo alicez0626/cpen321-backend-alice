@@ -7,7 +7,7 @@ async function getInfo (email) {
 	await db.query(query)
 	.then ( (result) => {
 		if ( result.length == 0)
-			throw "User name does not refer to any entry.";
+			throw "The username does not exists.";
 		return result[0];
 	})
 	.catch( (err) => {
@@ -15,21 +15,19 @@ async function getInfo (email) {
 	})
 };
 
-async function updateUser (user) {
-	for (var x in user){
-		if (x !== 'userId'){
-			var query = "UPDATE Users SET " + x + " = '" + user[x] + "' WHERE userId = '" + user.userId + "'";
-			
-			await db.query(query)
-			.then( (result) => {
-				if (!result.affectedRows)
-					throw "No such userId";
-			})
-			.catch( (err) => {
-				throw err;
-			})
-		}
-	}
+async function updateUser (userId, userPwd) {
+	// if (user == null){
+	// 	throw "Empty user object";
+	// }
+	var query = "UPDATE Users SET userPwd = '" + userPwd + "' WHERE userId = '" + userId + "'";
+
+	var result = await db.query(query)
+	.catch( (err) => {
+		throw err;
+	});
+
+	if (!result.affectedRows)
+		throw "No such userId";
 };
 
 async function createUser (user, profile) {
@@ -45,12 +43,12 @@ async function createUser (user, profile) {
 
 	await db.query(userQuery)
 	.then ( async (result) => {
-		await db.query(profileQuery)
+		await db.query(profileQuery);
 	})
 	.catch ( (err) => {
 		throw err;
 	})
- }
+}
 
 async function deleteUser (userId) {
 	var userQuery = "DELETE FROM Users WHERE userId = " + userId + ";";
@@ -79,15 +77,29 @@ async function getProfile (userId) {
 	var query = "SELECT * FROM Profiles WHERE userId = " + userId + "";
 
 	var result = await db.query(query)
-						.catch( (err) => {
-							throw err;
-						})
+	.catch( (err) => {
+		throw err;
+	})
 	
 	if (result.length == 0){
 		throw "The userId does not exist.";
 	}
 	return result[0];
-	
+}
+
+async function modifyProfile (userId, profile){
+	for (var x in profile){
+		var query = "UPDATE Profiles SET " + x + " = '" + profile[x] + "' WHERE userId = '" + userId + "'";
+
+		await db.query(query)
+		.then( (result) => {
+			if (!result.affectedRows)
+				throw "No such userId";
+		})
+		.catch( (err) => {
+			throw err;
+		})
+	}
 }
 
 // async function updateProfile
@@ -108,5 +120,7 @@ module.exports = {
 	updateUser,
 	createUser,
 	deleteUser,
-	getProfile
+	getProfile,
+	getInfo,
+	modifyProfile
 }

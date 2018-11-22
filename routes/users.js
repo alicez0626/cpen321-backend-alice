@@ -8,14 +8,7 @@ var validator = require('../middlewares/validation');
 router.put('/', 
 	userController.userUpdate);
 
-router.post('/',
-	(req, res, next) => { 
-		/* since the validator cannot find userEmail in body, we 
-		need to put all json into req.param for the validator to check*/
-		Object.assign(req.params, req.body.profile, req.body.user);
-		next();
-	}, 
-	validator.checkParams,
+router.post('/signup',
 	userController.userCreate);
 
 router.delete('/', 

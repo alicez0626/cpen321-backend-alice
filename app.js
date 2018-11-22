@@ -6,11 +6,11 @@ var UserDB = require('./databases/UserDB');
 var bodyParser = require('body-parser');
 var promise = require('express-promise');
 var Promise = require('promise');
-//var sqlinjection = require('sql-injection');
+// var sqlinjection = require('sql-injection');
 
 /*----require routers-----------*/
-var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var projectRouter = require('./routes/projects');
 /*------------------------------*/
 
 var app = express();
@@ -21,12 +21,12 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
-//app.use(sqlinjection);
+// app.use(sqlinjection);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(promise());
 
-app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/projects', projectRouter);
 
 function close (){
 	server.close();

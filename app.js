@@ -9,8 +9,8 @@ var Promise = require('promise');
 // var sqlinjection = require('sql-injection');
 
 /*----require routers-----------*/
-var usersRouter = require('./routes/users');
-var projectRouter = require('./routes/projects');
+var usersRouter = require('./routes/user');
+var projectRouter = require('./routes/project');
 /*------------------------------*/
 
 var app = express();
@@ -25,8 +25,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(promise());
 
-app.use('/users', usersRouter);
-app.use('/projects', projectRouter);
+app.use('/user', usersRouter);
+app.use('/project', projectRouter);
 
 function close (){
 	server.close();

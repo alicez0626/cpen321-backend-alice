@@ -1,5 +1,5 @@
 var db = require('../databases/UserDB.js');
-//var profile_db = require('../databases/ProfileDB')
+var ProjectDB = require('../databases/ProjectDB')
 
 async function getInfo (email) {
 	var query = "SELECT * FROM Users WHERE userEmail = '" + email + "'";
@@ -16,9 +16,6 @@ async function getInfo (email) {
 };
 
 async function updateUser (userId, userPwd) {
-	// if (user == null){
-	// 	throw "Empty user object";
-	// }
 	var query = "UPDATE Users SET userPwd = '" + userPwd + "' WHERE userId = '" + userId + "'";
 
 	var result = await db.query(query)
@@ -41,14 +38,18 @@ async function createUser (user, profile) {
 	profileValues = addQuotation(profileValues);
 	var profileQuery = "INSERT INTO Profiles (" + profileColumns + ") VALUES (" + profileValues + ");";
 
-	await db.query(userQuery)
-	.then ( async (result) => {
-		await db.query(profileQuery);
-	})
+	var userResult = await db.query(userQuery)
 	.catch ( (err) => {
 		throw err;
 	})
-}
+
+	var profileResult = await db.query(profileQuery)
+	.catch ( (err) => {
+		throw err;
+	})
+
+	return userResult.insertId;
+} // copy this to CPEN-321
 
 async function deleteUser (userId) {
 	var userQuery = "DELETE FROM Users WHERE userId = " + userId + ";";
@@ -91,14 +92,14 @@ async function modifyProfile (userId, profile){
 	for (var x in profile){
 		var query = "UPDATE Profiles SET " + x + " = '" + profile[x] + "' WHERE userId = '" + userId + "'";
 
-		await db.query(query)
-		.then( (result) => {
-			if (!result.affectedRows)
-				throw "No such userId";
-		})
+		var result = await db.query(query)
 		.catch( (err) => {
 			throw err;
 		})
+
+		if (result.affectedRows == 0){
+			throw "userId " + userId + " does not exist in Profiles";
+		}
 	}
 }
 
@@ -116,11 +117,43 @@ function addQuotation (values){
 	return withQuotation;
 }
 
+async function getProjectId (userId){
+	var query = "SELECT projectId FROM Projects WHERE projectOwnerId = '" + userId + "'";
+	var result = await ProjectDB.query(query)
+	.catch (error => {
+		throw error;
+	})
+
+	var projectId = [];
+	for (var i = 0; i < result.length; i++){
+		projectId.push(result[i].projectId);
+	}
+
+	return projectId;
+}
+
+async function getInvitation (userId){
+	var query = "SELECT * FROM InviteList WHERE userId = '" + userId + "'";
+	var result = await ProjectDB.query(query)
+	.catch (error => {
+		throw error;
+	})
+
+	var invitation = [];
+	for (var i = 0; i < result.length; i++){
+		invitation.push(result[i].userId);
+	}
+
+	return invitation;
+}
+
 module.exports = {
 	updateUser,
 	createUser,
 	deleteUser,
 	getProfile,
 	getInfo,
-	modifyProfile
+	modifyProfile,
+	getProjectId,
+	getInvitation
 }

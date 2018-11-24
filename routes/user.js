@@ -2,8 +2,6 @@ var express = require('express');
 var router = express.Router();
 var bodyParser = require('body-parser');
 var userController = require('../controllers/userController');
-//const {check, validationResult} = require('express-validator/check');
-var validator = require('../middlewares/validation');
 
 router.put('/', 
 	userController.userUpdate);
@@ -19,5 +17,8 @@ router.get('/profile',
 
 router.put('/profile',
 	userController.profileUpdate);
+
+router.get('/projects',
+	userController.getProjectId);
 
 module.exports = router;

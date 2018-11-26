@@ -116,6 +116,15 @@ async function deleteProject (req, res){
 	}
 }
 
+async function deleteMembers(req, res){
+	try{
+		await Project.deleteMembers(req.body.projectId, req.body.userId);
+		res.status(200).end();
+	} catch (error) {
+		res.status(400).json({error});
+	}
+}
+
 module.exports = {
 	putEventOwner,
 	createEvents,
@@ -125,4 +134,5 @@ module.exports = {
 	createProject,
 	deleteProject,
 	// inviteUser
+	deleteMembers,
 }

@@ -147,6 +147,17 @@ async function getInvitation (userId){
 	return invitation;
 }
 
+async function emailExist (userEmail){
+	var query = "SELECT userEmail from Users WHERE userEmail = '" + userEmail + "'";
+	var result = await db.query(query)
+	.catch(error => {
+		throw error;
+	})
+	if (result.length != 0){
+		throw "userEmail " + userEmail + " has been taken."
+	}
+}
+
 module.exports = {
 	updateUser,
 	createUser,
@@ -155,5 +166,6 @@ module.exports = {
 	getInfo,
 	modifyProfile,
 	getProjectId,
-	getInvitation
+	getInvitation,
+	emailExist
 }

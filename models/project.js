@@ -108,7 +108,11 @@ async function isUserInProject (projectId, userId){
 		}
 	}
 
-	throw "userId " + userId + " does not belong to projectId " + projectId;
+	try{
+		await isOwner(projectId, userId);
+	} catch (error){
+		throw "userId " + userId + " does not belong to projectId " + projectId;
+	}
 }
 
 async function getProject (projectId){
@@ -174,10 +178,6 @@ async function getMemberId (projectId){
 		throw error;
 	})
 
-	if (memberId.length == 0){
-		throw "projectId" + projectId + "does not exist in Membership table";
-	}
-
 	var memberIdArr = [];
 	for (var i = 0; i < memberId.length; i++){
 		memberIdArr.push(memberId[i].userId);
@@ -226,18 +226,7 @@ async function createProject (project, userId){
 		throw "Creating project was not successful, something wrong with ProjectDB";
 	}
 
-	var projectId = result.insertId;
-
-	query = "INSERT INTO Membership (projectId, userId) VALUES (" + projectId + ", " + userId + ")";
-	result = await ProjectDB.query(query)
-	.catch (error => {
-		throw error;
-	})
-	if (result.affectedRows == 0){
-		throw "Adding owner to Membership was not successful, something wrong with ProjectDB";
-	}
-
-	return projectId;
+	return result.insertId;
 }
 
 async function deleteProject (projectId){
@@ -287,7 +276,35 @@ async function deleteProject (projectId){
 
 }
 
+//userId[]
+async function deleteMembers(projectId, userId){
+	for (var i = 0; i < userId.length; i++){
+		var query = "DELETE FROM Membership WHERE projectId = '" + projectId + "' AND userId = '" + userId[i] + "'";
+		var result = await ProjectDB.query(query)
+		.catch (error => {
+			throw error;
+		})
+		if (result.affectedRows == 0){
+			throw "No projectId " + projectId + " userId " + userId + " pair in Membership";
+		}
+	}
 
+	for (var i = 0; i < userId.length; i++){
+		var query = "SELECT eventId from EventList WHERE projectId = '" + projectId + "'";
+		var result = await ProjectDB.query(query)
+		.catch (error => {
+			throw error;
+		})
+
+		for (var j = 0; j < result.length; j++){
+			query = "DELETE FROM MemberInEvents WHERE eventId = '" + result[j].eventId + "' AND userId = '" + userId[i] + "'";
+			await ProjectDB.query(query)
+			.catch (error => {
+				throw error;
+			})
+		}
+	}
+}
 
 
 module.exports = {
@@ -302,4 +319,5 @@ module.exports = {
 	putProject,
 	createProject,
 	deleteProject,
+	deleteMembers,
 }

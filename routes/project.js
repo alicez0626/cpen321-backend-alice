@@ -91,5 +91,9 @@ router.delete('/', function(req, res){
 // 	projectController.inviteUser;
 // });
 
+router.delete('/members', function(req, res){
+	projectController.deleteMembers(req, res);
+})
+
 
 module.exports = router;

@@ -4,37 +4,38 @@ jest.mock('../../databases/UserDB');
 const db = require('../../databases/UserDB');
 db.query = jest.fn();
 
+jest.mock('../../databases/ProjectDB');
+const ProjectDB = require('../../databases/ProjectDB');
+ProjectDB.query = jest.fn();
+
 describe('Testing models/user', () => {
 	const user = {
 		userId: 1,
 		userEmail: "123@gmail.com"
 	};
 	const profile = {
-		userId: 1,
-		userEmail: "123@gmail.com"
+		userGender: 1
 	};
 
 	var querySpy = jest.spyOn(db, 'query');
 	
 	describe('Testing getInfo', () => {
 		test('Existing userEmail, should call db.query once', async () => {
-			sqlReturn(1);
+			userDbReturn(1);
 
 			await User.getInfo("123@gmail.com");
 			expect(db.query.mock.calls.length).toBe(1);
 		})
 		test('Non-existing userEmail, should call db.query once, throws err', async () => {
-			sqlReturn(0);
-			const expectedError = "User name does not refer to any entry.";
+			userDbReturn(0);
 
 			await User.getInfo("123@gmail.com")
 			.catch( error => {
-				expect(error).toBe(expectedError);
 				expect(db.query.mock.calls.length).toBe(1);
 			})
 		})
 		test('SQL internal err', async () => {
-			sqlInternalErr();
+			userDbErr();
 
 			await User.getInfo("123@gmail.com")
 			.catch( error => {
@@ -45,14 +46,14 @@ describe('Testing models/user', () => {
 
 	describe('Testing updateUser', () => {
 		test('Valid userId, should call db.query', async () => {
-			sqlAffectedRows(1);
+			userDbAffectedRows(1);
 
 			await User.updateUser(user);
 			expect(querySpy).toHaveBeenCalled();
 		});
 
 		test('Invalid userId, should call db.query, throws error', async () => {
-			sqlAffectedRows(0);
+			userDbAffectedRows(0);
 
 			const expectedError = "No such userId";
 
@@ -63,17 +64,8 @@ describe('Testing models/user', () => {
 			expect(querySpy).toHaveBeenCalled();
 		})
 
-		test('Empty user object, should not call db.query, throws error', async () => {
-			const expectedError = "Empty user object";
-
-			await User.updateUser(null)
-			.catch( error => {
-				expect(error).toBe(expectedError);
-			})
-		})
-
 		test('MySQL error, should call db.query, throws error', async () => {
-			sqlInternalErr();
+			userDbErr();
 
 			await User.updateUser(user)
 			.catch( error => {
@@ -84,13 +76,14 @@ describe('Testing models/user', () => {
 
 	describe('Testing createUser', () => {
 		test('valid user and profile, should call db.query twice', async () => {
-			sqlAffectedRows(2);
+			userDbAffectedRows(1);
+			userDbAffectedRows(1);
 
 			await User.createUser(user, profile);
 			expect(db.query.mock.calls.length).toBe(2);
 		})
 		test('MySQL internal error, throws error', async () => {
-			sqlInternalErr();
+			userDbErr();
 
 			await User.createUser(user, profile)
 			.catch ( error => {
@@ -101,14 +94,14 @@ describe('Testing models/user', () => {
 
 	describe('Testing deleteUser', () => {
 		test('Existing userId, should call db.query twice', async () => {
-			sqlAffectedRows(1);
-			sqlAffectedRows(1);
+			userDbAffectedRows(1);
+			userDbAffectedRows(1);
 
 			await User.deleteUser(1);
 			expect(db.query.mock.calls.length).toBe(2);
 		})
 		test('Non-existing userId, should call db.query once', async () => {
-			sqlAffectedRows(0);
+			userDbAffectedRows(0);
 
 			const expectedError = "The user has been deleted.";
 
@@ -119,8 +112,8 @@ describe('Testing models/user', () => {
 			expect(db.query.mock.calls.length).toBe(1);
 		})
 		test('userId in user and profile does not match, should call db.query twice, throws error', async () => {
-			sqlAffectedRows(1);
-			sqlAffectedRows(0);
+			userDbAffectedRows(1);
+			userDbAffectedRows(0);
 
 			const expectedError = "The user's profile has been deleted."
 
@@ -131,7 +124,7 @@ describe('Testing models/user', () => {
 			expect(db.query.mock.calls.length).toBe(2);
 		})
 		test('SQL internal error, throws error', async () => {
-			sqlInternalErr();
+			userDbErr();
 
 			await User.deleteUser(1)
 			.catch( error => {
@@ -142,13 +135,13 @@ describe('Testing models/user', () => {
 
 	describe('Testing getProfile', () => {
 		test('Exisiting userId, should call db.query once', async () => {
-			sqlReturn(1);
+			userDbReturn(1);
 
 			await User.getProfile(1);
 			expect(db.query.mock.calls.length).toBe(1);
 		})
 		test('Non-existing userId, should call db.query once, throws error', async () => {
-			sqlReturn(0);
+			userDbReturn(0);
 
 			const expectedError = "The userId does not exist.";
 
@@ -159,7 +152,7 @@ describe('Testing models/user', () => {
 			})
 		})
 		test('SQL internal error, throws error', async () => {
-			sqlInternalErr();
+			userDbErr();
 
 			await User.getProfile(1)
 			.catch( error => {
@@ -168,22 +161,119 @@ describe('Testing models/user', () => {
 		})
 	})
 
+	describe('Testing modifyProfile', () => {
+		test('Exisiting userId, should call db.query once', async () => {
+			userDbAffectedRows(1);
+
+			await User.modifyProfile(1, profile);
+			expect(querySpy).toHaveBeenCalled();
+		})
+		test('Non-existing userId, throw err', async () => {
+			userDbAffectedRows(0);
+
+			await User.modifyProfile(1, profile)
+			.catch(error => {
+				expect(querySpy).toHaveBeenCalled();
+			})
+		})
+		test('userDbErr', async () => {
+			userDbErr();
+
+			await User.modifyProfile(1, profile)
+			.catch(error => {
+				expect(error).toBe('userDbErr');
+				expect(querySpy).toHaveBeenCalled();
+			})
+		})
+	})
+
+	describe('Testing getProjectId', () => {
+		test('userId maps to projectId', async () => {
+			projectDbReturn(1);
+
+			await User.getProjectId(1)
+			.then( (result) => {
+				expect(result.length).toBe(1);
+			})
+		})
+		test('userId has no mapping to projectId', async () => {
+			projectDbReturn(0);
+
+			await User.getProjectId(1)
+			.then( (result) => {
+				expect(result.length).toBe(0);
+			})
+		})
+		test('projectDbErr', async () => {
+			projectDbErr();
+			await User.getProjectId(1)
+			.catch( err => {
+				expect(err).toBe('projectDbErr');
+			})
+		})
+	})
+
+	describe('Testing getInvitation', () => {
+		test('userId has mapping to invitation', async () => {
+			projectDbReturn(1);
+			await User.getInvitation(1)
+			.then( result => {
+				expect(result.length).toBe(1);
+			})
+		})
+		test('userId has no mapping to invitation', async () => {
+			projectDbReturn(0);
+			await User.getInvitation(1)
+			.then( result => {
+				expect(result.length).toBe(0);
+			})
+		})
+		test('projectDbErr', async () => {
+			projectDbErr();
+			await User.getInvitation(1)
+			.catch( error => {
+				expect(error).toBe('projectDbErr');
+			})
+		})
+	})
+
+	describe('Testing emailExist', () => {
+		test('Existing userEmail', async () => {
+			userDbReturn(1);
+			await User.emailExist('123@gmail.com')
+			.catch( error => {
+				expect(error).toBe('userEmail 123@gmail.com has been taken.');
+			})
+		})
+		test('Non-existing userEmail', async () => {
+			userDbReturn(0);
+			await User.emailExist('123@gmail.com')
+			expect(querySpy).toHaveBeenCalled();
+		})
+		test('userDbErr', async () => {
+			userDbErr();
+			await User.emailExist('')
+			.catch( error => {
+				expect(error).toBe('userDbErr');
+			})
+		})
+	})
 
 });
 
-function sqlInternalErr(){
+function userDbErr(){
 	db.query.mockImplementationOnce( () => {
-		return Promise.reject();
+		return Promise.reject("userDbErr");
 	});
 }
 
-function sqlAffectedRows(rows){
+function userDbAffectedRows(rows){
 	db.query.mockImplementationOnce( () => {
 		return Promise.resolve({affectedRows: rows});
 	});
 }
 
-function sqlReturn(numResult){
+function userDbReturn(numResult){
 	db.query.mockImplementationOnce( () => {
 		if (numResult == 0){
 			return Promise.resolve([]);
@@ -193,6 +283,23 @@ function sqlReturn(numResult){
 	});
 }
 
+function projectDbReturn(numResult){
+	ProjectDB.query.mockImplementationOnce( () => {
+		if (numResult == 0){
+			return Promise.resolve([]);
+		} else {
+			return Promise.resolve([{result: "Some results"}]);
+		}
+	})
+}
+
+function projectDbErr(){
+	ProjectDB.query.mockImplementationOnce( () => {
+		return Promise.reject("projectDbErr");
+	});
+}
+
 afterEach( () => {
 	db.query.mockReset();
+	ProjectDB.query.mockReset();
 });
